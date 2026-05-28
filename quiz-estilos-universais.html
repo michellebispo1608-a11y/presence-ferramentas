@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Os Sete Estilos Universais — Michelle Carvalho</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --gold: #c9a96e; --black: #0f0f0f; --off-white: #f0ede6; --card-bg: #1a1a1a; --border: rgba(201,169,110,0.25); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f0f0f; }
+    .wrap { background: #0f0f0f; color: var(--off-white); font-family: 'Montserrat', sans-serif; min-height: 100vh; padding: 2.5rem 1.5rem 4rem; max-width: 860px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 2rem; }
+    .header h1 { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: var(--gold); letter-spacing: 3px; text-transform: uppercase; }
+    .divider { width: 60px; height: 1px; background: var(--gold); margin: 14px auto; opacity: 0.5; }
+    .header p { font-size: 11px; color: rgba(240,237,230,0.45); letter-spacing: 1.5px; text-transform: uppercase; }
+    .gender-row { display: flex; gap: 16px; justify-content: center; margin-bottom: 2rem; }
+    .gender-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 28px; border: 1px solid var(--border); background: transparent; color: rgba(240,237,230,0.4); font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; border-radius: 4px; transition: all 0.2s; min-width: 110px; }
+    .gender-btn svg { width: 32px; height: 32px; stroke: rgba(240,237,230,0.3); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; }
+    .gender-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,169,110,0.08); }
+    .gender-btn.active svg { stroke: var(--gold); }
+    .section-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: rgba(240,237,230,0.4); margin-bottom: 0.5rem; text-align: center; }
+    .hint { font-size: 11px; color: rgba(201,169,110,0.6); text-align: center; margin-bottom: 1.5rem; }
+    .counter { text-align: center; font-size: 12px; color: rgba(240,237,230,0.4); margin-bottom: 1.5rem; letter-spacing: 1px; }
+    .counter span { color: var(--gold); font-weight: 500; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px; padding: 1rem 1rem 0.75rem; cursor: pointer; transition: all 0.2s; position: relative; }
+    .card:hover { border-color: rgba(201,169,110,0.5); }
+    .card.selected { border-color: var(--gold); background: rgba(201,169,110,0.07); }
+    .card.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+    .card-num { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 400; color: var(--gold); line-height: 1; margin-bottom: 10px; }
+    .traits { list-style: none; }
+    .traits li { font-size: 12px; color: rgba(240,237,230,0.7); padding: 4px 0; border-bottom: 1px solid rgba(201,169,110,0.08); display: flex; align-items: center; gap: 6px; line-height: 1.5; }
+    .traits li:last-child { border-bottom: none; }
+    .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); opacity: 0.35; flex-shrink: 0; }
+    .card.selected .dot { opacity: 1; }
+    .check { position: absolute; top: 10px; right: 10px; width: 18px; height: 18px; border-radius: 50%; background: var(--gold); display: none; align-items: center; justify-content: center; }
+    .card.selected .check { display: flex; }
+    .check svg { width: 10px; height: 10px; stroke: #0f0f0f; stroke-width: 2.5; fill: none; }
+    .submit-btn { display: block; width: 100%; max-width: 280px; margin: 0 auto 2rem; padding: 14px; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+    .submit-btn:hover:not(:disabled) { background: rgba(201,169,110,0.12); }
+    .submit-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+    .result-box { display: none; background: rgba(201,169,110,0.06); border: 1px solid rgba(201,169,110,0.3); border-radius: 4px; padding: 1.5rem; margin-bottom: 2rem; text-align: center; }
+    .result-box.visible { display: block; }
+    .r-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: rgba(240,237,230,0.4); margin-bottom: 8px; }
+    .r-name { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 500; color: var(--gold); margin-bottom: 4px; }
+    .r-sub { font-size: 12px; color: rgba(240,237,230,0.45); margin-bottom: 1rem; }
+    .r-desc { font-size: 13px; color: rgba(240,237,230,0.75); line-height: 1.75; border-top: 1px solid rgba(201,169,110,0.15); padding-top: 1rem; }
+    .footer-brand { text-align: center; margin-top: 2rem; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(201,169,110,0.35); }
+    .reset-btn { background: transparent; border: none; color: rgba(240,237,230,0.25); font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; display: block; margin: 0 auto; padding: 8px; transition: color 0.2s; }
+    .reset-btn:hover { color: var(--gold); }
+    @media (max-width: 480px) {
+      .grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 22px; }
+      .gender-btn { padding: 14px 20px; min-width: 90px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>Os Sete Estilos Universais</h1>
+    <div class="divider"></div>
+    <p>Identifique o seu estilo predominante</p>
+  </div>
+
+  <div class="gender-row">
+    <button class="gender-btn active" onclick="setGender('f')" id="btn-f">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M12 12v8M9 17h6"/></svg>
+      Feminino
+    </button>
+    <button class="gender-btn" onclick="setGender('m')" id="btn-m">
+      <svg viewBox="0 0 24 24"><circle cx="10" cy="14" r="4"/><path d="M15 9l5-5M20 4h-4M20 4v4"/></svg>
+      Masculino
+    </button>
+  </div>
+
+  <p class="section-label">Selecione o que mais combina com você</p>
+  <p class="hint">Escolha até 3 opções</p>
+  <div class="counter">Selecionadas: <span id="count">0</span> de 3</div>
+
+  <div class="grid" id="grid"></div>
+
+  <button class="submit-btn" id="submit-btn" disabled onclick="showResult()">Revelar meu estilo</button>
+
+  <div class="result-box" id="result-box">
+    <p class="r-label">Seu estilo predominante</p>
+    <p class="r-name" id="r-name"></p>
+    <p class="r-sub" id="r-sub"></p>
+    <p class="r-desc" id="r-desc"></p>
+  </div>
+
+  <button class="reset-btn" onclick="reset()">Recomeçar</button>
+
+  <p class="footer-brand">michellecarva.com.br &nbsp;·&nbsp; Método PRESENCE®</p>
+</div>
+
+<script>
+const data = {
+  f: [
+    { n:"1", name:"Clássico", traits:["Prefere peças sem detalhes exagerados","Valoriza o corte acima da estampa","Opta por cores neutras no dia a dia","Evita tendências passageiras","Seu guarda-roupa é coeso e funcional"], desc:"Sua imagem comunica credibilidade e consistência. Você valoriza o que é atemporal e funcional, e isso se reflete em escolhas precisas, sem excessos." },
+    { n:"2", name:"Elegante", traits:["Prefere tecidos leves e de bom caimento","Gosta de silhuetas suaves e fluidas","Opta por looks sofisticados no cotidiano","Detalhes finos fazem diferença para você","Harmonia entre as peças é prioridade"], desc:"Você une feminilidade e refinamento de forma natural. Sua presença é suave e sofisticada, e as escolhas de peças refletem atenção ao acabamento e ao caimento." },
+    { n:"3", name:"Esportivo", traits:["Conforto é critério de escolha obrigatório","Prefere tênis a qualquer outro calçado","Gosta de looks práticos e dinâmicos","Tecidos funcionais fazem parte da rotina","Visual descomplicado e moderno"], desc:"Sua imagem transmite energia e objetividade. Você prioriza movimento e praticidade, e seu estilo reflete um perfil direto e contemporâneo." },
+    { n:"4", name:"Sexy", traits:["Gosta de roupas que valorizam o corpo","Não tem receio de decotes ou recortes","Salto alto é um item frequente","Visual de forte impacto pessoal","Confiança é parte do look"], desc:"Você usa a imagem de forma intencional e consciente. Sua presença é marcante e as escolhas de roupa reforçam a autoridade que você transmite." },
+    { n:"5", name:"Dramático", traits:["Preto é sua cor de referência","Gosta de volumes e estruturas fortes","Prefere um visual de alto contraste","Peças de impacto chamam sua atenção","Não quer passar despercebida"], desc:"Sua imagem comunica poder e singularidade. Você usa a roupa como ferramenta de posicionamento, e seu estilo tem uma assinatura clara e inconfundível." },
+    { n:"6", name:"Romântico", traits:["Aprecia babados, rendas e bordados","Cores suaves e florais são frequentes","Prefere tecidos leves e delicados","Detalhes fazem parte da escolha","Look suave e gracioso no dia a dia"], desc:"Você expressa sensibilidade e cuidado através da imagem. Detalhes delicados fazem parte da sua linguagem visual e comunicam proximidade e afeto." },
+    { n:"7", name:"Criativo", traits:["Combina peças de formas inusitadas","Estampas e texturas juntas não são problema","Acessórios marcantes completam o look","Gosta de peças que contam uma história","Seguir padrões de moda não é seu estilo"], desc:"Sua imagem é expressão de identidade. Você usa a roupa como linguagem própria, e cada escolha comunica originalidade e pensamento independente." }
+  ],
+  m: [
+    { n:"1", name:"Clássico", traits:["Prefere peças estruturadas e bem cortadas","Sapato social faz parte da rotina","Cores sóbrias são a base do guarda-roupa","Evita peças com muito detalhe ou estampa","Look que transmite seriedade e cuidado"], desc:"Você comunica credibilidade e competência pela imagem. Seu estilo é consistente, atemporal e transmite uma autoridade construída com intenção." },
+    { n:"2", name:"Elegante", traits:["Blazer faz parte do cotidiano","Prefere combinações harmônicas e neutras","Cuidado com o caimento das peças","Look refinado sem exigir gravata","Estilo que equilibra formal e casual"], desc:"Você equilibra formalidade e modernidade com naturalidade. Sua imagem transmite cuidado sem exagero, refinamento sem rigidez." },
+    { n:"3", name:"Esportivo", traits:["Tênis é o calçado favorito","Moletom e jaqueta fazem parte do dia a dia","Conforto orienta as escolhas","Visual casual e de fácil resolução","Praticidade acima de qualquer coisa"], desc:"Sua imagem é direta e energética. Conforto e funcionalidade guiam suas escolhas, refletindo um perfil ágil e contemporâneo." },
+    { n:"4", name:"Sexy", traits:["Prefere roupas que valorizem a silhueta","Camisa aberta ou justa no dia a dia","Visual de forte presença pessoal","Confiança visível nas escolhas de roupa","Look que comunica intenção"], desc:"Você usa a roupa de forma intencional para gerar presença. Seu estilo comunica segurança e consciência, não vaidade." },
+    { n:"5", name:"Dramático", traits:["Preto predomina no guarda-roupa","Gosta de casacos longos e estruturados","Volumes e sobreposições chamam atenção","Visual de alto contraste e impacto","Quer ser notado sem precisar falar"], desc:"Sua presença é imediata e inconfundível. Você usa a imagem como ferramenta de poder e diferenciação, com uma assinatura visual bem definida." },
+    { n:"6", name:"Romântico", traits:["Prefere cores suaves como rosa e bege","Linho e tecidos leves no dia a dia","Look descontraído e acolhedor","Estilo gentil e de fácil aproximação","Peças sem estrutura rígida ou peso"], desc:"Você transmite calor humano e acessibilidade pela imagem. Seu estilo é suave e genuíno, comunicando uma presença próxima e cuidadosa." },
+    { n:"7", name:"Criativo", traits:["Combina peças que ninguém combinaria","Estampas e cores incomuns têm espaço","Acessórios são destaque no look","Brechó e peças autorais fazem parte","Convencional não é uma opção"], desc:"Sua roupa é expressão direta da sua personalidade. Você pensa fora do padrão e usa a imagem como linguagem criativa e autêntica." }
+  ]
+};
+
+let gender='f', selected=[];
+
+function setGender(g){
+  gender=g; selected=[];
+  document.getElementById('btn-f').classList.toggle('active',g==='f');
+  document.getElementById('btn-m').classList.toggle('active',g==='m');
+  document.getElementById('result-box').classList.remove('visible');
+  renderGrid(); updateUI();
+}
+
+function renderGrid(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  data[gender].forEach(s=>{
+    const c=document.createElement('div');
+    c.className='card'; c.id='card-'+s.n;
+    c.onclick=()=>toggle(s.n);
+    c.innerHTML=`<div class="check"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1"/></svg></div><div class="card-num">${s.n}</div><ul class="traits">${s.traits.map(t=>`<li><span class="dot"></span>${t}</li>`).join('')}</ul>`;
+    grid.appendChild(c);
+  });
+}
+
+function toggle(n){
+  const idx=selected.indexOf(n);
+  if(idx>-1){ selected.splice(idx,1); }
+  else { if(selected.length>=3) return; selected.push(n); }
+  updateUI();
+}
+
+function updateUI(){
+  document.getElementById('count').textContent=selected.length;
+  data[gender].forEach(s=>{
+    const c=document.getElementById('card-'+s.n); if(!c) return;
+    const isSel=selected.includes(s.n);
+    const isFull=selected.length>=3&&!isSel;
+    c.classList.toggle('selected',isSel);
+    c.classList.toggle('disabled',isFull);
+  });
+  document.getElementById('submit-btn').disabled=selected.length===0;
+}
+
+function showResult(){
+  if(!selected.length) return;
+  const counts={};
+  selected.forEach(n=>{ counts[n]=(counts[n]||0)+1; });
+  const winner=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+  const style=data[gender].find(s=>s.n===winner);
+  document.getElementById('r-name').textContent=style.n+'. '+style.name;
+  const others=selected.filter(n=>n!==winner).map(n=>{ const s=data[gender].find(x=>x.n===n); return s?s.name:''; }).filter(Boolean);
+  document.getElementById('r-sub').textContent=others.length>0?'Com traços de: '+others.join(' e '):'Estilo predominante bem definido';
+  document.getElementById('r-desc').textContent=style.desc;
+  document.getElementById('result-box').classList.add('visible');
+  document.getElementById('result-box').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function reset(){
+  selected=[];
+  document.getElementById('result-box').classList.remove('visible');
+  renderGrid(); updateUI();
+}
+
+renderGrid(); updateUI();
+</script>
+</body>
+</html>
