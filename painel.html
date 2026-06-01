@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>O Poder da Narrativa Visual — Painel ao Vivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --gold: #c9a96e; --black: #0f0f0f; --off-white: #f0ede6; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--black); color: var(--off-white); font-family: 'Montserrat', sans-serif; min-height: 100vh; padding: 3rem 2rem; }
+    .header { text-align: center; margin-bottom: 3rem; }
+    .header h1 { font-family: 'Cormorant Garamond', serif; font-size: 42px; color: var(--gold); letter-spacing: 4px; text-transform: uppercase; }
+    .divider { width: 60px; height: 1px; background: var(--gold); margin: 16px auto; opacity: 0.5; }
+    .total { font-size: 11px; color: rgba(240,237,230,0.4); letter-spacing: 2px; text-transform: uppercase; }
+    .total span { color: var(--gold); font-weight: 600; font-size: 13px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+    .card { background: #141414; border: 1px solid rgba(201,169,110,0.2); border-radius: 6px; padding: 2rem; }
+    .q-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: rgba(201,169,110,0.5); margin-bottom: 10px; }
+    .q-text { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--off-white); line-height: 1.4; margin-bottom: 1.5rem; }
+    .bar-row { display: flex; flex-direction: column; gap: 10px; }
+    .bar-item { display: flex; align-items: center; gap: 12px; }
+    .bar-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(240,237,230,0.5); width: 32px; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+    .bar-fill.sim { background: var(--gold); }
+    .bar-fill.nao { background: rgba(240,237,230,0.2); }
+    .bar-pct { font-size: 13px; font-weight: 600; color: var(--off-white); width: 40px; text-align: right; flex-shrink: 0; }
+    .bar-count { font-size: 11px; color: rgba(240,237,230,0.3); width: 50px; flex-shrink: 0; }
+    .insight { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(201,169,110,0.1); font-size: 12px; color: rgba(201,169,110,0.7); line-height: 1.6; min-height: 36px; }
+    .footer { text-align: center; margin-top: 3rem; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(201,169,110,0.25); }
+    .live-dot { display: inline-block; width: 7px; height: 7px; background: #c9a96e; border-radius: 50%; margin-right: 6px; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>O Poder da Narrativa Visual</h1>
+  <div class="divider"></div>
+  <p class="total"><span class="live-dot"></span>Ao vivo · <span id="total">0</span> respostas</p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div style="text-align:center; margin-top: 2.5rem;">
+  <button onclick="zerarRespostas()" style="background:transparent; border:1px solid rgba(240,237,230,0.15); color:rgba(240,237,230,0.3); font-family:'Montserrat',sans-serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; padding:10px 24px; cursor:pointer; border-radius:2px; transition:all 0.2s;"
+    onmouseover="this.style.borderColor='rgba(255,80,80,0.4)';this.style.color='rgba(255,100,100,0.6)'"
+    onmouseout="this.style.borderColor='rgba(240,237,230,0.15)';this.style.color='rgba(240,237,230,0.3)'">
+    Zerar respostas
+  </button>
+</div>
+<p class="footer" style="margin-top:1.5rem;">michellecarva.com.br · Método PRESENCE®</p>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBGI7Hc9g479Ee15GRHzsq7byNOSggVWKk",
+    authDomain: "presence-quiz.firebaseapp.com",
+    databaseURL: "https://presence-quiz-default-rtdb.firebaseio.com",
+    projectId: "presence-quiz",
+    storageBucket: "presence-quiz.firebasestorage.app",
+    messagingSenderId: "299751776936",
+    appId: "1:299751776936:web:01c514ee7b577a5d45989d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const perguntas = [
+    { key: "q0", texto: "Você acredita que o ambiente percebe seu valor com clareza?",
+      insight_sim: pct => `${pct}% acreditam que são percebidos com clareza`,
+      insight_nao: pct => `${pct}% sentem que seu valor não é percebido corretamente` },
+    { key: "q1", texto: "Sua imagem sustenta os objetivos que deseja alcançar?",
+      insight_sim: pct => `${pct}% acreditam que sua imagem está alinhada aos objetivos`,
+      insight_nao: pct => `${pct}% sentem que a imagem não sustenta seus objetivos` },
+    { key: "q2", texto: "Você sente que sua presença transmite confiança?",
+      insight_sim: pct => `${pct}% sentem que transmitem confiança`,
+      insight_nao: pct => `${pct}% sentem que sua presença não transmite confiança` },
+    { key: "q3", texto: "Você já se sentiu invisível profissionalmente?",
+      insight_sim: pct => `${pct}% já sentiram invisibilidade profissional`,
+      insight_nao: pct => `${pct}% nunca sentiram invisibilidade profissional` }
+  ];
+
+  function renderCards() {
+    const grid = document.getElementById('grid');
+    perguntas.forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = `card-${i}`;
+      card.innerHTML = `
+        <p class="q-label">Pergunta ${i + 1}</p>
+        <p class="q-text">${p.texto}</p>
+        <div class="bar-row">
+          <div class="bar-item">
+            <span class="bar-label">Sim</span>
+            <div class="bar-track"><div class="bar-fill sim" id="bar-sim-${i}" style="width:0%"></div></div>
+            <span class="bar-pct" id="pct-sim-${i}">0%</span>
+            <span class="bar-count" id="cnt-sim-${i}">0 resp.</span>
+          </div>
+          <div class="bar-item">
+            <span class="bar-label">Não</span>
+            <div class="bar-track"><div class="bar-fill nao" id="bar-nao-${i}" style="width:0%"></div></div>
+            <span class="bar-pct" id="pct-nao-${i}">0%</span>
+            <span class="bar-count" id="cnt-nao-${i}">0 resp.</span>
+          </div>
+        </div>
+        <p class="insight" id="insight-${i}"></p>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function atualizar(dados) {
+    const contagens = perguntas.map(() => ({ sim: 0, nao: 0 }));
+    let total = 0;
+
+    if (dados) {
+      Object.values(dados).forEach(r => {
+        total++;
+        perguntas.forEach((p, i) => {
+          if (r[p.key] === 'sim') contagens[i].sim++;
+          else if (r[p.key] === 'nao') contagens[i].nao++;
+        });
+      });
+    }
+
+    document.getElementById('total').textContent = total;
+
+    perguntas.forEach((p, i) => {
+      const { sim, nao } = contagens[i];
+      const tot = sim + nao;
+      const pctSim = tot > 0 ? Math.round((sim / tot) * 100) : 0;
+      const pctNao = tot > 0 ? Math.round((nao / tot) * 100) : 0;
+
+      document.getElementById(`bar-sim-${i}`).style.width = pctSim + '%';
+      document.getElementById(`bar-nao-${i}`).style.width = pctNao + '%';
+      document.getElementById(`pct-sim-${i}`).textContent = pctSim + '%';
+      document.getElementById(`pct-nao-${i}`).textContent = pctNao + '%';
+      document.getElementById(`cnt-sim-${i}`).textContent = sim + ' resp.';
+      document.getElementById(`cnt-nao-${i}`).textContent = nao + ' resp.';
+
+      let insightText = '';
+      if (tot > 0) {
+        if (pctNao >= pctSim) {
+          insightText = p.insight_nao(pctNao);
+        } else {
+          insightText = p.insight_sim(pctSim);
+        }
+      }
+      document.getElementById(`insight-${i}`).textContent = insightText;
+    });
+  }
+
+  window.zerarRespostas = function() {
+    if (!confirm('Zerar todas as respostas? Essa ação não pode ser desfeita.')) return;
+    remove(ref(db, 'respostas')).then(() => atualizar(null));
+  };
+
+  renderCards();
+  onValue(ref(db, 'respostas'), snap => atualizar(snap.val()));
+</script>
+</body>
+</html>
