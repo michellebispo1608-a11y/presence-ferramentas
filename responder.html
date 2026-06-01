@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presença — Responda</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --gold: #c9a96e; --black: #0f0f0f; --off-white: #f0ede6; --border: rgba(201,169,110,0.25); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--black); color: var(--off-white); font-family: 'Montserrat', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
+    .wrap { width: 100%; max-width: 480px; }
+    .header { text-align: center; margin-bottom: 2.5rem; }
+    .header h1 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+    .divider { width: 50px; height: 1px; background: var(--gold); margin: 12px auto; opacity: 0.5; }
+    .header p { font-size: 11px; color: rgba(240,237,230,0.4); letter-spacing: 1.5px; text-transform: uppercase; }
+    .questions { display: flex; flex-direction: column; gap: 16px; margin-bottom: 2rem; }
+    .q-card { background: #1a1a1a; border: 1px solid var(--border); border-radius: 4px; padding: 1.25rem; }
+    .q-text { font-size: 13px; color: rgba(240,237,230,0.85); line-height: 1.65; margin-bottom: 1rem; }
+    .q-options { display: flex; gap: 10px; }
+    .opt-btn {
+      flex: 1; padding: 10px 6px; border: 1px solid var(--border); background: transparent;
+      color: rgba(240,237,230,0.5); font-family: 'Montserrat', sans-serif;
+      font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; border-radius: 2px; transition: all 0.2s;
+    }
+    .opt-btn:hover { border-color: rgba(201,169,110,0.5); color: rgba(240,237,230,0.8); }
+    .opt-btn.selected-sim { border-color: var(--gold); background: rgba(201,169,110,0.12); color: var(--gold); }
+    .opt-btn.selected-nao { border-color: rgba(240,237,230,0.3); background: rgba(240,237,230,0.05); color: rgba(240,237,230,0.7); }
+    .submit-btn { display: block; width: 100%; padding: 14px; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+    .submit-btn:hover:not(:disabled) { background: rgba(201,169,110,0.12); }
+    .submit-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+    .success { display: none; text-align: center; padding: 2rem 1rem; }
+    .success.visible { display: block; }
+    .success-icon { font-size: 36px; margin-bottom: 1rem; color: var(--gold); }
+    .success h2 { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--gold); margin-bottom: 8px; }
+    .success p { font-size: 12px; color: rgba(240,237,230,0.45); letter-spacing: 1px; }
+    .footer { text-align: center; margin-top: 2.5rem; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(201,169,110,0.3); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div id="form-area">
+    <div class="header">
+      <h1>Presença</h1>
+      <div class="divider"></div>
+      <p>Responda com sinceridade</p>
+    </div>
+
+    <div class="questions" id="questions"></div>
+
+    <button class="submit-btn" id="submit-btn" disabled onclick="enviar()">Enviar respostas</button>
+  </div>
+
+  <div class="success" id="success">
+    <div class="success-icon">✦</div>
+    <h2>Obrigada</h2>
+    <p>Sua resposta foi registrada</p>
+  </div>
+
+  <p class="footer">michellecarva.com.br · Método PRESENCE®</p>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBGI7Hc9g479Ee15GRHzsq7byNOSggVWKk",
+    authDomain: "presence-quiz.firebaseapp.com",
+    databaseURL: "https://presence-quiz-default-rtdb.firebaseio.com",
+    projectId: "presence-quiz",
+    storageBucket: "presence-quiz.firebasestorage.app",
+    messagingSenderId: "299751776936",
+    appId: "1:299751776936:web:01c514ee7b577a5d45989d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const perguntas = [
+    "Você acredita que o ambiente percebe seu valor com clareza?",
+    "Sua imagem sustenta os objetivos que deseja alcançar?",
+    "Você sente que sua presença transmite confiança?",
+    "Você já se sentiu invisível profissionalmente?"
+  ];
+
+  const respostas = {};
+
+  function renderizar() {
+    const container = document.getElementById('questions');
+    perguntas.forEach((q, i) => {
+      const card = document.createElement('div');
+      card.className = 'q-card';
+      card.innerHTML = `
+        <p class="q-text">${i + 1}. ${q}</p>
+        <div class="q-options">
+          <button class="opt-btn" id="q${i}-sim" onclick="selecionar(${i}, 'sim')">Sim</button>
+          <button class="opt-btn" id="q${i}-nao" onclick="selecionar(${i}, 'nao')">Não</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  window.selecionar = function(idx, val) {
+    respostas[idx] = val;
+    document.getElementById(`q${idx}-sim`).className = 'opt-btn' + (val === 'sim' ? ' selected-sim' : '');
+    document.getElementById(`q${idx}-nao`).className = 'opt-btn' + (val === 'nao' ? ' selected-nao' : '');
+    document.getElementById('submit-btn').disabled = Object.keys(respostas).length < perguntas.length;
+  };
+
+  window.enviar = async function() {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    try {
+      await push(ref(db, 'respostas'), {
+        q0: respostas[0], q1: respostas[1], q2: respostas[2], q3: respostas[3],
+        ts: Date.now()
+      });
+      document.getElementById('form-area').style.display = 'none';
+      document.getElementById('success').classList.add('visible');
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = 'Enviar respostas';
+      alert('Erro ao enviar. Tente novamente.');
+    }
+  };
+
+  renderizar();
+</script>
+</body>
+</html>
