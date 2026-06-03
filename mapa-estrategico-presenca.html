@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Mapa Estratégico da Imagem — Michelle Carvalho</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0a0a0a;--gold:#c9a96e;--gold-mid:#ddc898;--gold-pale:#f7f1e8;
+  --gold-dark:#8a6535;--off:#f0ede6;--white:#fff;--g100:#f5f3ef;
+  --g200:#e8e5de;--g400:#b0ab9e;--g600:#6b6560;
+  --serif:'Cormorant Garamond',Georgia,serif;--sans:'Montserrat',sans-serif;
+}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--sans);background:var(--black);color:var(--white);min-height:100vh;overflow-x:hidden}
+.bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 15% 5%,#c9a96e0a 0%,transparent 60%),
+             radial-gradient(ellipse 50% 70% at 85% 95%,#c9a96e06 0%,transparent 60%)}
+.wrap{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:0 18px 100px}
+
+/* HEADER */
+.header{padding:48px 0 36px;text-align:center}
+.header-line{width:32px;height:1px;background:var(--gold);margin:0 auto 18px;opacity:.7}
+.eyebrow{font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.main-title{font-family:var(--serif);font-size:clamp(30px,7vw,44px);font-weight:300;line-height:1.1;margin-bottom:10px}
+.main-title em{font-style:italic;color:var(--gold)}
+.main-sub{font-size:11px;font-weight:300;color:var(--g400);letter-spacing:.06em;margin-bottom:24px}
+.tagline-wrap{display:flex;align-items:center;gap:10px;justify-content:center}
+.tagline-wrap::before,.tagline-wrap::after{content:'';flex:1;max-width:48px;height:1px}
+.tagline-wrap::before{background:linear-gradient(to right,transparent,var(--g600))}
+.tagline-wrap::after{background:linear-gradient(to left,transparent,var(--g600))}
+.tagline{font-family:var(--serif);font-size:13px;font-style:italic;color:var(--g600)}
+
+/* DADOS */
+.dados-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+.dado-field{display:flex;flex-direction:column;gap:6px}
+.dado-field label{font-size:9px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--g600)}
+.dado-field input{background:#111;border:1px solid #222;border-radius:8px;padding:11px 13px;font-family:var(--sans);font-size:13px;font-weight:300;color:var(--white);outline:none;transition:border-color .2s;-webkit-appearance:none}
+.dado-field input:focus{border-color:var(--gold)}
+.dado-field input::placeholder{color:#333;font-size:12px}
+
+/* SEÇÃO */
+.secao{background:#0d0d0d;border:1px solid #1c1c1c;border-radius:16px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden;transition:border-color .25s}
+.secao::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:.4}
+.secao.touched{border-color:#2a2a2a}
+.secao.touched::before{opacity:1}
+.secao-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px}
+.secao-num{font-family:var(--serif);font-size:28px;font-weight:300;color:var(--gold);opacity:.3;line-height:1;flex-shrink:0;width:28px}
+.secao-titulo{font-family:var(--serif);font-size:18px;font-weight:400;color:var(--white);line-height:1.2;margin-bottom:3px}
+.secao-titulo em{font-style:italic;color:var(--gold)}
+.secao-desc{font-size:10px;font-weight:300;color:var(--g600);line-height:1.5;letter-spacing:.03em}
+
+/* SUBGRUPO */
+.subgrupo{margin-bottom:18px}
+.subgrupo:last-child{margin-bottom:0}
+.sublabel{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--g600);margin-bottom:10px;display:block}
+
+/* CHIPS SELEÇÃO ÚNICA */
+.chips-sel{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.chip-sel{font-size:11px;font-weight:400;padding:6px 14px;border-radius:20px;border:1px solid #222;background:transparent;color:var(--g600);cursor:pointer;transition:all .15s;letter-spacing:.02em;-webkit-user-select:none;user-select:none}
+.chip-sel:active{transform:scale(.96)}
+.chip-sel.on{background:var(--gold-pale);border-color:var(--gold-mid);color:var(--gold-dark);font-weight:500}
+
+/* CHIPS MÚLTIPLA ESCOLHA */
+.chips-multi{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.chip-multi{font-size:11px;font-weight:400;padding:6px 14px;border-radius:20px;border:1px solid #222;background:transparent;color:var(--g600);cursor:pointer;transition:all .15s;letter-spacing:.02em;-webkit-user-select:none;user-select:none}
+.chip-multi:active{transform:scale(.96)}
+.chip-multi.on{background:var(--gold-pale);border-color:var(--gold-mid);color:var(--gold-dark);font-weight:500}
+.chip-multi.on-neg{background:#1e0a0a;border-color:#6a2510;color:#b05040;font-weight:500}
+
+/* TEXTAREA */
+textarea{width:100%;background:#111;border:1px solid #1e1e1e;border-radius:8px;padding:12px 13px;font-family:var(--sans);font-size:13px;font-weight:300;color:var(--white);line-height:1.7;resize:none;outline:none;transition:border-color .2s;-webkit-appearance:none;min-height:72px}
+textarea:focus{border-color:var(--gold);background:#0f0f0f}
+textarea::placeholder{color:#2a2a2a;font-size:12px;font-style:italic}
+.complemento-label{font-size:9px;color:var(--g600);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;display:block;margin-top:2px}
+
+/* CHECKS */
+.checks{display:flex;flex-direction:column;gap:9px}
+.check-item{display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 12px;border:1px solid #1a1a1a;border-radius:8px;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.check-item.checked{border-color:#2a2a2a;background:#111}
+.check-box{width:18px;height:18px;border-radius:4px;border:1.5px solid #333;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.check-item.checked .check-box{background:var(--gold);border-color:var(--gold)}
+.check-item.checked .check-box::after{content:'✓';font-size:11px;color:var(--black);font-weight:700}
+.check-text{font-size:12px;font-weight:300;color:var(--g400);line-height:1.5;transition:color .18s}
+.check-item.checked .check-text{color:var(--white)}
+
+/* CENTRO */
+.centro-ring{border:1px solid #2a2a2a;border-radius:50%;width:100px;height:100px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.centro-ring::before{content:'';position:absolute;inset:6px;border-radius:50%;border:1px solid #1a1a1a}
+.centro-icon{font-family:var(--serif);font-size:12px;font-style:italic;color:var(--gold);text-align:center;line-height:1.4;padding:8px;position:relative;z-index:1}
+
+/* DIVISOR */
+.divisor{height:1px;background:linear-gradient(to right,transparent,#2a2a2a,transparent);margin:20px 0}
+
+/* BARRA FIXA */
+.salvar-wrap{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:12px 18px 16px;background:linear-gradient(to top,#000 60%,transparent)}
+.salvar-inner{max-width:600px;margin:0 auto;display:flex;gap:10px}
+.btn-salvar{flex:1;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:14px;border-radius:8px;border:1.5px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
+.btn-salvar::before{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .22s}
+.btn-salvar:active::before{transform:scaleX(1)}
+.btn-salvar span{position:relative;z-index:1}
+.btn-salvar:active span{color:var(--black)}
+.btn-print{width:48px;border-radius:8px;border:1px solid #222;background:#111;color:var(--g400);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(8px);background:#1a1a1a;border:1px solid var(--gold);border-radius:10px;padding:11px 20px;font-size:12px;color:var(--white);opacity:0;pointer-events:none;transition:all .3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* FOOTER */
+.footer{text-align:center;margin-top:8px}
+.footer p{font-family:var(--serif);font-size:14px;color:var(--gold);margin-bottom:4px}
+.footer small{font-size:10px;color:var(--g600);letter-spacing:.07em}
+
+/* PRINT */
+@media print{
+  body{background:#fff!important;color:#0a0a0a!important}
+  .bg-layer,.salvar-wrap,.toast{display:none!important}
+  .wrap{max-width:100%;padding:20px}
+  .secao{background:#fff!important;border:1px solid #ccc!important;break-inside:avoid;margin-bottom:12px}
+  .secao::before{display:none}
+  .secao-titulo,.main-title{color:#0a0a0a!important}
+  .secao-titulo em,.main-title em,.eyebrow{color:#8a6535!important}
+  textarea,.dado-field input{background:#f5f3ef!important;color:#0a0a0a!important;border:1px solid #ccc!important}
+  .chip-sel,.chip-multi{border:1px solid #ccc!important;color:#555!important}
+  .chip-sel.on,.chip-multi.on{background:#f7f1e8!important;border-color:#c9a96e!important;color:#8a6535!important}
+  .chip-multi.on-neg{background:#fdf0f0!important;color:#903020!important}
+  .check-item{border:1px solid #ddd!important}
+  .check-item.checked .check-box{background:#c9a96e!important}
+  .check-text{color:#555!important}
+  .check-item.checked .check-text{color:#0a0a0a!important}
+  .footer p{color:#8a6535!important}
+  .footer small,.secao-desc,.sublabel,.complemento-label{color:#888!important}
+  .centro-ring{border-color:#ccc!important}
+  .centro-icon{color:#8a6535!important}
+}
+@media(max-width:400px){
+  .dados-row{grid-template-columns:1fr}
+  .secao{padding:20px}
+}
+</style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-line"></div>
+  <div class="eyebrow">Método PRESENCE®</div>
+  <h1 class="main-title">Mapa Estratégico<br>da <em>Imagem</em></h1>
+  <p class="main-sub">Imagem · Percepção · Leitura · Direção</p>
+  <div class="tagline-wrap">
+    <span class="tagline">Presença não é aparência. É alinhamento.</span>
+  </div>
+</div>
+
+<!-- DADOS -->
+<div class="dados-row">
+  <div class="dado-field">
+    <label>Nome</label>
+    <input type="text" id="d-nome" placeholder="Seu nome" autocomplete="name">
+  </div>
+  <div class="dado-field">
+    <label>Data</label>
+    <input type="text" id="d-data" placeholder="dd/mm/aaaa">
+  </div>
+</div>
+
+<!-- ══ 1. POSIÇÃO ATUAL ══ -->
+<div class="secao" id="s1">
+  <div class="secao-header">
+    <div class="secao-num">1</div>
+    <div>
+      <div class="secao-titulo">Posição <em>Atual</em></div>
+      <div class="secao-desc">Onde estou hoje</div>
+    </div>
+  </div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Qual posição ocupo hoje?</span>
+    <div class="chips-sel" id="chips-posicao"></div>
+    <span class="complemento-label">Complemento ou outro</span>
+    <textarea id="f-posicao-txt" placeholder="Detalhe ou descreva uma posição não listada acima..." oninput="touch('s1');ar(this)"></textarea>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Em qual ambiente atuo?</span>
+    <div class="chips-multi" id="chips-ambiente"></div>
+    <span class="complemento-label">Complemento</span>
+    <textarea id="f-ambiente-txt" placeholder="Detalhe o seu ambiente ou contexto de atuação..." oninput="touch('s1');ar(this)"></textarea>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Com quem me relaciono?</span>
+    <div class="chips-multi" id="chips-relaciona"></div>
+    <span class="complemento-label">Complemento</span>
+    <textarea id="f-relaciona-txt" placeholder="Descreva o perfil das pessoas com quem se relaciona..." oninput="touch('s1');ar(this)"></textarea>
+  </div>
+</div>
+
+<!-- ══ 2. PERCEPÇÃO ATUAL ══ -->
+<div class="secao" id="s2">
+  <div class="secao-header">
+    <div class="secao-num">2</div>
+    <div>
+      <div class="secao-titulo">Percepção <em>Atual</em></div>
+      <div class="secao-desc">Como sou percebido hoje</div>
+    </div>
+  </div>
+
+  <div class="subgrupo">
+    <span class="sublabel">As pessoas me veem como:</span>
+    <div class="chips-multi" id="chips-veem"></div>
+    <span class="complemento-label">Complemento</span>
+    <textarea id="f-veem-txt" placeholder="Como você acredita que é percebido hoje..." oninput="touch('s2');ar(this)"></textarea>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Essa percepção ajuda ou limita meu crescimento?</span>
+    <div class="chips-sel" id="chips-ajudalimita"></div>
+    <span class="complemento-label">Reflexão</span>
+    <textarea id="f-ajudalimita-txt" placeholder="De que forma essa percepção impacta seus resultados e oportunidades..." oninput="touch('s2');ar(this)"></textarea>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Sua presença sustenta o valor que você possui?</span>
+    <div class="chips-sel" id="chips-sustenta"></div>
+    <span class="complemento-label">Reflexão</span>
+    <textarea id="f-sustenta-txt" placeholder="Existe alinhamento entre o que você entrega e o que o ambiente percebe..." oninput="touch('s2');ar(this)"></textarea>
+  </div>
+</div>
+
+<!-- ══ 3. CÓDIGO VISUAL ══ -->
+<div class="secao" id="s3">
+  <div class="secao-header">
+    <div class="secao-num">3</div>
+    <div>
+      <div class="secao-titulo">Código <em>Visual</em></div>
+      <div class="secao-desc">Olhe para o seu acervo pessoal — veja as peças que mais usa, repare nos detalhes: estrutura da peça, gola, modelagem</div>
+    </div>
+  </div>
+
+  <!-- O QUE TEM NO SEU ARMÁRIO -->
+  <div class="subgrupo" style="background:#111;border:1px solid #1e1e1e;border-radius:12px;padding:16px;margin-bottom:20px">
+    <span class="sublabel" style="color:var(--gold);margin-bottom:14px;display:block;font-size:9px;letter-spacing:.18em">O que tem na realidade do seu armário</span>
+
+    <div style="margin-bottom:16px">
+      <span class="sublabel">Formas — as peças que mais usa têm linhas:</span>
+      <div class="chips-multi" id="chips-formas"></div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <span class="sublabel">Cores — seu armário é predominantemente:</span>
+      <div class="chips-multi" id="chips-cores"></div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <span class="sublabel">Volume — as peças ficam:</span>
+      <div class="chips-multi" id="chips-volume"></div>
+    </div>
+
+    <div style="margin-bottom:0">
+      <span class="sublabel">Movimento — as peças são mais:</span>
+      <div class="chips-multi" id="chips-movimento"></div>
+    </div>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div class="subgrupo">
+    <span class="sublabel" style="color:var(--gold)">Sinais que sua imagem transmite — que fortalecem</span>
+    <div class="chips-multi" id="chips-pos"></div>
+  </div>
+  <div class="subgrupo" style="margin-bottom:0">
+    <span class="sublabel" style="color:#a05040">Sinais que sua imagem transmite — que enfraquecem</span>
+    <div class="chips-multi" id="chips-neg"></div>
+  </div>
+</div>
+
+<!-- ══ 4. POSICIONAMENTO ══ -->
+<div class="secao" id="s4">
+  <div class="secao-header">
+    <div class="secao-num">4</div>
+    <div>
+      <div class="secao-titulo"><em>Posicionamento</em></div>
+      <div class="secao-desc">Como você quer ser percebido</div>
+    </div>
+  </div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Como quer ser percebido?</span>
+    <div class="chips-multi" id="chips-quero-percebido"></div>
+    <span class="complemento-label">Complemento</span>
+    <textarea id="f-quero-txt" placeholder="Qual imagem você quer que o ambiente construa sobre você..." oninput="touch('s4');ar(this)"></textarea>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Que espaço deseja ocupar?</span>
+    <div class="chips-sel" id="chips-espaco"></div>
+    <span class="complemento-label">Complemento</span>
+    <textarea id="f-espaco-txt" placeholder="Qual posição ou nível você quer alcançar..." oninput="touch('s4');ar(this)"></textarea>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Quais clientes ou oportunidades deseja atrair?</span>
+    <div class="chips-multi" id="chips-clientes"></div>
+    <span class="complemento-label">Complemento</span>
+    <textarea id="f-clientes-txt" placeholder="Descreva o perfil de quem você quer alcançar..." oninput="touch('s4');ar(this)"></textarea>
+  </div>
+</div>
+
+<!-- ══ 5. CENTRO DA PRESENÇA ══ -->
+<div class="secao" id="s5">
+  <div class="secao-header">
+    <div class="secao-num">5</div>
+    <div>
+      <div class="secao-titulo">Centro da <em>Presença</em></div>
+      <div class="secao-desc">Que presença estou sustentando hoje?</div>
+    </div>
+  </div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Minha presença hoje é:</span>
+    <div class="chips-sel" id="chips-centro-tipo"></div>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div style="display:flex;align-items:flex-start;gap:14px">
+    <div class="centro-ring">
+      <div class="centro-icon">Eu<br>sou</div>
+    </div>
+    <div style="flex:1">
+      <span class="sublabel">Em suas próprias palavras:</span>
+      <textarea id="f-centro" style="min-height:100px" placeholder="Quem você é, o que representa e que presença está sustentando hoje..." oninput="touch('s5');ar(this)"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 6. AJUSTES DE IMAGEM ══ -->
+<div class="secao" id="s6">
+  <div class="secao-header">
+    <div class="secao-num">6</div>
+    <div>
+      <div class="secao-titulo">Ajustes de <em>Imagem</em></div>
+      <div class="secao-desc">O que preciso ajustar</div>
+    </div>
+  </div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Áreas que precisam de ajuste — selecione as prioritárias:</span>
+    <div class="chips-multi" id="chips-ajustes-area"></div>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div class="subgrupo" style="margin-bottom:0">
+    <span class="sublabel">Urgência dos ajustes:</span>
+    <div class="chips-sel" id="chips-urgencia"></div>
+    <span class="complemento-label">Detalhe os ajustes</span>
+    <textarea id="f-ajustes-txt" placeholder="Liste os ajustes prioritários na sua imagem visual, comportamento e comunicação..." oninput="touch('s6');ar(this)"></textarea>
+  </div>
+</div>
+
+<!-- ══ 7. VISIBILIDADE E DIREÇÃO ══ -->
+<div class="secao" id="s7">
+  <div class="secao-header">
+    <div class="secao-num">7</div>
+    <div>
+      <div class="secao-titulo">Visibilidade e <em>Direção</em></div>
+      <div class="secao-desc">Decisões e próximos passos</div>
+    </div>
+  </div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Que decisão preciso tomar:</span>
+    <div class="chips-multi" id="chips-decisao"></div>
+    <span class="complemento-label">Complemento</span>
+    <textarea id="f-decisao-txt" placeholder="Descreva a decisão que precisa tomar..." oninput="touch('s7');ar(this)"></textarea>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div class="subgrupo">
+    <span class="sublabel">Que atitude preciso sustentar:</span>
+    <div class="chips-multi" id="chips-atitude"></div>
+    <span class="complemento-label">Complemento</span>
+    <textarea id="f-atitude-txt" placeholder="Que comportamento ou postura você precisa manter..." oninput="touch('s7');ar(this)"></textarea>
+  </div>
+
+  <div class="divisor"></div>
+
+  <div class="subgrupo" style="margin-bottom:0">
+    <span class="sublabel">Meu próximo passo concreto — prazo:</span>
+    <div class="chips-sel" id="chips-prazo"></div>
+    <span class="complemento-label">Descreva a ação</span>
+    <textarea id="f-proximo-txt" placeholder="Uma ação específica que vou tomar para sustentar minha presença..." oninput="touch('s7');ar(this)"></textarea>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Michelle Carvalho</p>
+  <small>Presença não se mostra. Se sustenta. &nbsp;|&nbsp; michellecarva.com.br</small>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- BARRA FIXA -->
+<div class="salvar-wrap">
+  <div class="salvar-inner">
+    <button class="btn-salvar" onclick="salvar()"><span>Salvar meu mapa</span></button>
+    <button class="btn-print" onclick="window.print()" title="Salvar como PDF">⎙</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DADOS DAS OPÇÕES ──────────────────────────────────────────────────────────
+
+const OPCOES = {
+  // S1
+  posicao: {
+    tipo:'sel', id:'chips-posicao',
+    itens:['Empresário / Sócio','Empreendedor','Liderança / Gestão','CLT / Executivo','Profissional Liberal','Autônomo / Freelancer','Servidor Público','Estudante','Em transição de carreira']
+  },
+  ambiente: {
+    tipo:'multi', id:'chips-ambiente',
+    itens:['Corporativo','Empresarial','Saúde','Educação','Jurídico','Criativo / Comunicação','Tecnologia','Varejo / Comercial','Terceiro Setor','Acadêmico']
+  },
+  relaciona: {
+    tipo:'multi', id:'chips-relaciona',
+    itens:['Clientes / Compradores','Líderes e Diretores','Time / Equipe','Pares / Colegas','Fornecedores','Investidores','Comunidade / Público']
+  },
+
+  // S2
+  veem: {
+    tipo:'multi', id:'chips-veem',
+    itens:['Competente','Confiável','Acessível','Autoridade','Discreta','Elegante','Criativa','Liderança natural','Tímida / Reservada','Insegura','Desorganizada','Sem identidade clara','Comum']
+  },
+  ajudalimita: {
+    tipo:'sel', id:'chips-ajudalimita',
+    itens:['Me ajuda muito','Me ajuda parcialmente','É neutra','Me limita em alguns contextos','Me limita bastante']
+  },
+  sustenta: {
+    tipo:'sel', id:'chips-sustenta',
+    itens:['Sim, totalmente','Parcialmente','Ainda não','Não sei avaliar']
+  },
+
+  // S3 — acervo do armário
+  formas: {
+    tipo:'multi', id:'chips-formas',
+    itens:['Retas e estruturadas','Curvas e orgânicas','Inclinadas / assimétricas','Mistas — varia bastante']
+  },
+  cores: {
+    tipo:'multi', id:'chips-cores',
+    itens:['Escuras (preto, marinho, bordô)','Neutras (cinza, bege, camel)','Claras (branco, off-white, creme)','Intensas / vibrantes','Suaves / pastéis','Estampadas']
+  },
+  volume: {
+    tipo:'multi', id:'chips-volume',
+    itens:['Rentes ao corpo','Estrutura armada / ombro marcado','Faz volume / oversized','Flui sem marcar','Misto — depende da peça']
+  },
+  movimento: {
+    tipo:'multi', id:'chips-movimento',
+    itens:['Fluidas (jersey, seda, crepe)','Rígidas (alfaiataria, couro, linho estruturado)','Mistas — combino os dois']
+  },
+
+  // S3 — código visual
+  codigoPos: {
+    tipo:'multi', id:'chips-pos',
+    itens:['Autoridade','Acessibilidade','Segurança','Modernidade','Sofisticação','Credibilidade','Criatividade','Liderança']
+  },
+  codigoNeg: {
+    tipo:'multi', id:'chips-neg', neg:true,
+    itens:['Insegurança','Invisibilidade','Excesso','Ruído visual','Desconexão','Contradição com o cargo','Desatualização']
+  },
+
+  // S4
+  queroPer: {
+    tipo:'multi', id:'chips-quero-percebido',
+    itens:['Referência na área','Autoridade técnica','Líder inspirador','Parceiro estratégico','Especialista confiável','Profissional sofisticado','Comunicador impactante','Inovador']
+  },
+  espaco: {
+    tipo:'sel', id:'chips-espaco',
+    itens:['Liderança sênior','Gestão executiva','Especialista reconhecido','Empreendedor de referência','Posição de conselho','Expansão de mercado','Visibilidade pública']
+  },
+  clientes: {
+    tipo:'multi', id:'chips-clientes',
+    itens:['Grandes empresas','PMEs','Profissionais liberais','Empreendedores','Alta gestão','Setor público','Mercado internacional','Pessoas físicas premium']
+  },
+
+  // S5
+  centroTipo: {
+    tipo:'sel', id:'chips-centro-tipo',
+    itens:['Invisível — não me posiciono','Em construção — começa a aparecer','Inconsistente — varia por contexto','Presente — reconhecida na área','Estratégica — comunica antes de falar']
+  },
+
+  // S6
+  ajustesArea: {
+    tipo:'multi', id:'chips-ajustes-area',
+    itens:['Guarda-roupa e composições','Identidade visual / cores','Postura e linguagem corporal','Comunicação verbal','Presença em reuniões','Presença digital / redes','Foto e vídeo','Discurso de posicionamento']
+  },
+  urgencia: {
+    tipo:'sel', id:'chips-urgencia',
+    itens:['Urgente — impactando resultados agora','Alta — preciso ajustar em 30 dias','Média — próximos 3 meses','Planejamento — próximos 6 meses']
+  },
+
+  // S7
+  decisao: {
+    tipo:'multi', id:'chips-decisao',
+    itens:['Investir na minha imagem','Redefinir meu posicionamento','Construir presença digital','Buscar mentoria ou consultoria','Atualizar guarda-roupa estratégico','Trabalhar comunicação e oratória','Ajustar minha marca pessoal']
+  },
+  atitude: {
+    tipo:'multi', id:'chips-atitude',
+    itens:['Ocupar espaço com intenção','Aparecer consistentemente','Cuidar da imagem todos os dias','Comunicar meu valor sem desculpas','Ser vista antes de ser ouvida','Sustentar presença no digital','Parar de esperar estar pronta']
+  },
+  prazo: {
+    tipo:'sel', id:'chips-prazo',
+    itens:['Esta semana','Em 15 dias','Em 30 dias','Em 3 meses']
+  },
+};
+
+// ── ESTADO ────────────────────────────────────────────────────────────────────
+const estado = {};
+Object.keys(OPCOES).forEach(k => {
+  estado[k] = OPCOES[k].tipo === 'sel' ? null : new Set();
+});
+
+// garante chaves novas que podem não existir em saves antigos
+['formas','cores','volume','movimento'].forEach(k => {
+  if (!estado[k]) estado[k] = new Set();
+});
+
+// ── BUILDER DE CHIPS ──────────────────────────────────────────────────────────
+function buildChips(key) {
+  const cfg = OPCOES[key];
+  const el  = document.getElementById(cfg.id);
+  if (!el) return;
+
+  cfg.itens.forEach(item => {
+    const b = document.createElement('button');
+    b.className = cfg.tipo === 'sel' ? 'chip-sel' : 'chip-multi';
+    b.textContent = item;
+    b.dataset.key  = key;
+    b.dataset.item = item;
+
+    b.addEventListener('click', () => {
+      const secEl = el.closest('.secao');
+      if (secEl) touch(secEl.id);
+
+      if (cfg.tipo === 'sel') {
+        // seleção única
+        el.querySelectorAll('.' + b.className).forEach(x => x.classList.remove('on'));
+        if (estado[key] === item) {
+          estado[key] = null;
+        } else {
+          estado[key] = item;
+          b.classList.add('on');
+        }
+      } else {
+        // múltipla
+        const clsOn = cfg.neg ? 'on-neg' : 'on';
+        if (estado[key].has(item)) {
+          estado[key].delete(item);
+          b.classList.remove(clsOn);
+        } else {
+          estado[key].add(item);
+          b.classList.add(clsOn);
+        }
+      }
+    });
+    el.appendChild(b);
+  });
+}
+
+Object.keys(OPCOES).forEach(buildChips);
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function touch(id) {
+  document.getElementById(id)?.classList.add('touched');
+}
+function ar(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+// data automática
+const di = document.getElementById('d-data');
+if (!di.value) {
+  const d = new Date();
+  di.value = d.toLocaleDateString('pt-BR');
+}
+
+// ── SALVAR ────────────────────────────────────────────────────────────────────
+const SKEY = 'mapa_presenca_mc_v2';
+
+function getData() {
+  const txtVal = id => document.getElementById(id)?.value || '';
+  const stateSnap = {};
+  Object.keys(estado).forEach(k => {
+    stateSnap[k] = estado[k] instanceof Set ? [...estado[k]] : estado[k];
+  });
+  return {
+    nome: document.getElementById('d-nome').value,
+    data: document.getElementById('d-data').value,
+    estado: stateSnap,
+    textos: {
+      posicaoTxt:    txtVal('f-posicao-txt'),
+      ambienteTxt:   txtVal('f-ambiente-txt'),
+      relacionaTxt:  txtVal('f-relaciona-txt'),
+      veemTxt:       txtVal('f-veem-txt'),
+      ajudaLimitaTxt:txtVal('f-ajudalimita-txt'),
+      sustentaTxt:   txtVal('f-sustenta-txt'),
+      queroPer:      txtVal('f-quero-txt'),
+      espacoTxt:     txtVal('f-espaco-txt'),
+      clientesTxt:   txtVal('f-clientes-txt'),
+      centroTxt:     txtVal('f-centro'),
+      ajustesTxt:    txtVal('f-ajustes-txt'),
+      decisaoTxt:    txtVal('f-decisao-txt'),
+      atitudeTxt:    txtVal('f-atitude-txt'),
+      proximoTxt:    txtVal('f-proximo-txt'),
+    }
+  };
+}
+
+function setData(d) {
+  if (!d) return;
+  document.getElementById('d-nome').value = d.nome || '';
+  document.getElementById('d-data').value = d.data || '';
+
+  const setTxt = (id, val) => {
+    const el = document.getElementById(id);
+    if (el && val) { el.value = val; ar(el); }
+  };
+  if (d.textos) {
+    setTxt('f-posicao-txt',    d.textos.posicaoTxt);
+    setTxt('f-ambiente-txt',   d.textos.ambienteTxt);
+    setTxt('f-relaciona-txt',  d.textos.relacionaTxt);
+    setTxt('f-veem-txt',       d.textos.veemTxt);
+    setTxt('f-ajudalimita-txt',d.textos.ajudaLimitaTxt);
+    setTxt('f-sustenta-txt',   d.textos.sustentaTxt);
+    setTxt('f-quero-txt',      d.textos.queroPer);
+    setTxt('f-espaco-txt',     d.textos.espacoTxt);
+    setTxt('f-clientes-txt',   d.textos.clientesTxt);
+    setTxt('f-centro',         d.textos.centroTxt);
+    setTxt('f-ajustes-txt',    d.textos.ajustesTxt);
+    setTxt('f-decisao-txt',    d.textos.decisaoTxt);
+    setTxt('f-atitude-txt',    d.textos.atitudeTxt);
+    setTxt('f-proximo-txt',    d.textos.proximoTxt);
+  }
+
+  if (d.estado) {
+    Object.keys(d.estado).forEach(k => {
+      const cfg = OPCOES[k];
+      if (!cfg) return;
+      const el = document.getElementById(cfg.id);
+      if (!el) return;
+      const saved = d.estado[k];
+
+      if (cfg.tipo === 'sel' && saved) {
+        estado[k] = saved;
+        el.querySelectorAll('.chip-sel').forEach(b => {
+          if (b.dataset.item === saved) b.classList.add('on');
+        });
+      } else if (cfg.tipo !== 'sel' && Array.isArray(saved)) {
+        const clsOn = cfg.neg ? 'on-neg' : 'on';
+        saved.forEach(item => {
+          estado[k].add(item);
+          el.querySelectorAll('.chip-multi').forEach(b => {
+            if (b.dataset.item === item) b.classList.add(clsOn);
+          });
+        });
+      }
+    });
+  }
+
+  // touch sections com conteúdo
+  ['s1','s2','s3','s4','s5','s6','s7'].forEach(id => {
+    const sec = document.getElementById(id);
+    const hasChip = sec?.querySelector('.chip-sel.on, .chip-multi.on, .chip-multi.on-neg');
+    const hasTxt  = [...(sec?.querySelectorAll('textarea') || [])].some(t => t.value);
+    if (hasChip || hasTxt) sec?.classList.add('touched');
+  });
+}
+
+function salvar() {
+  try {
+    localStorage.setItem(SKEY, JSON.stringify(getData()));
+    showToast('Mapa salvo');
+  } catch(e) {
+    showToast('Use ⎙ para salvar como PDF');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+setInterval(() => {
+  try { localStorage.setItem(SKEY, JSON.stringify(getData())); } catch(e){}
+}, 30000);
+
+window.addEventListener('load', () => {
+  try {
+    const saved = localStorage.getItem(SKEY);
+    if (saved) setData(JSON.parse(saved));
+  } catch(e){}
+});
+</script>
+</body>
+</html>
