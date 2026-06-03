@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>O Poder da Narrativa Visual — Painel ao Vivo</title>
+  <title>Percepção de Imagem — Painel ao Vivo</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root { --gold: #c9a96e; --black: #0f0f0f; --off-white: #f0ede6; }
@@ -36,7 +36,7 @@
 <body>
 
 <div class="header">
-  <h1>O Poder da Narrativa Visual</h1>
+  <h1>Percepção de Imagem</h1>
   <div class="divider"></div>
   <p class="total"><span class="live-dot"></span>Ao vivo</p>
 </div>
@@ -70,16 +70,16 @@
   const db = getDatabase(app);
 
   const perguntas = [
-    { key: "q0", texto: "Você acredita que o ambiente percebe seu valor com clareza?",
+    { key: "q0", texto: "Já se sentiu subestimado por alguém?",
       insight_sim: pct => `${pct}% nunca se sentiram subestimados`,
       insight_nao: pct => `${pct}% já se sentiram subestimados` },
-    { key: "q1", texto: "Sua imagem sustenta os objetivos que deseja alcançar?",
+    { key: "q1", texto: "Já perdeu uma oportunidade por causa da sua imagem?",
       insight_sim: pct => `${pct}% nunca perderam oportunidade por causa da imagem`,
       insight_nao: pct => `${pct}% já perderam oportunidade por causa da imagem` },
-    { key: "q2", texto: "Você sente que sua presença transmite confiança?",
+    { key: "q2", texto: "Já perdeu um cliente, vaga ou contrato por falta de valor percebido?",
       insight_sim: pct => `${pct}% nunca perderam por falta de valor percebido`,
       insight_nao: pct => `${pct}% já perderam cliente, vaga ou contrato por falta de valor percebido` },
-    { key: "q3", texto: "Você já se sentiu invisível profissionalmente?",
+    { key: "q3", texto: "Sente que seu valor ainda não te traz retorno financeiro?",
       insight_sim: pct => `${pct}% sentem que seu valor já se converte em retorno financeiro`,
       insight_nao: pct => `${pct}% sentem que seu valor ainda não traz retorno financeiro` }
   ];
