@@ -26,7 +26,7 @@
     .bar-fill.sim { background: var(--gold); }
     .bar-fill.nao { background: rgba(240,237,230,0.2); }
     .bar-pct { font-size: 13px; font-weight: 600; color: var(--off-white); width: 40px; text-align: right; flex-shrink: 0; }
-    .bar-count { font-size: 11px; color: rgba(240,237,230,0.3); width: 50px; flex-shrink: 0; }
+    
     .insight { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(201,169,110,0.1); font-size: 12px; color: rgba(201,169,110,0.7); line-height: 1.6; min-height: 36px; }
     .footer { text-align: center; margin-top: 3rem; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(201,169,110,0.25); }
     .live-dot { display: inline-block; width: 7px; height: 7px; background: #c9a96e; border-radius: 50%; margin-right: 6px; animation: pulse 1.5s infinite; }
@@ -38,7 +38,7 @@
 <div class="header">
   <h1>O Poder da Narrativa Visual</h1>
   <div class="divider"></div>
-  <p class="total"><span class="live-dot"></span>Ao vivo · <span id="total">0</span> respostas</p>
+  <p class="total"><span class="live-dot"></span>Ao vivo</p>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -71,17 +71,17 @@
 
   const perguntas = [
     { key: "q0", texto: "Você acredita que o ambiente percebe seu valor com clareza?",
-      insight_sim: pct => `${pct}% acreditam que são percebidos com clareza`,
-      insight_nao: pct => `${pct}% sentem que seu valor não é percebido corretamente` },
+      insight_sim: pct => `${pct}% nunca se sentiram subestimados`,
+      insight_nao: pct => `${pct}% já se sentiram subestimados` },
     { key: "q1", texto: "Sua imagem sustenta os objetivos que deseja alcançar?",
-      insight_sim: pct => `${pct}% acreditam que sua imagem está alinhada aos objetivos`,
-      insight_nao: pct => `${pct}% sentem que a imagem não sustenta seus objetivos` },
+      insight_sim: pct => `${pct}% nunca perderam oportunidade por causa da imagem`,
+      insight_nao: pct => `${pct}% já perderam oportunidade por causa da imagem` },
     { key: "q2", texto: "Você sente que sua presença transmite confiança?",
-      insight_sim: pct => `${pct}% sentem que transmitem confiança`,
-      insight_nao: pct => `${pct}% sentem que sua presença não transmite confiança` },
+      insight_sim: pct => `${pct}% nunca perderam por falta de valor percebido`,
+      insight_nao: pct => `${pct}% já perderam cliente, vaga ou contrato por falta de valor percebido` },
     { key: "q3", texto: "Você já se sentiu invisível profissionalmente?",
-      insight_sim: pct => `${pct}% já sentiram invisibilidade profissional`,
-      insight_nao: pct => `${pct}% nunca sentiram invisibilidade profissional` }
+      insight_sim: pct => `${pct}% sentem que seu valor já se converte em retorno financeiro`,
+      insight_nao: pct => `${pct}% sentem que seu valor ainda não traz retorno financeiro` }
   ];
 
   function renderCards() {
@@ -98,13 +98,13 @@
             <span class="bar-label">Sim</span>
             <div class="bar-track"><div class="bar-fill sim" id="bar-sim-${i}" style="width:0%"></div></div>
             <span class="bar-pct" id="pct-sim-${i}">0%</span>
-            <span class="bar-count" id="cnt-sim-${i}">0 resp.</span>
+            
           </div>
           <div class="bar-item">
             <span class="bar-label">Não</span>
             <div class="bar-track"><div class="bar-fill nao" id="bar-nao-${i}" style="width:0%"></div></div>
             <span class="bar-pct" id="pct-nao-${i}">0%</span>
-            <span class="bar-count" id="cnt-nao-${i}">0 resp.</span>
+            
           </div>
         </div>
         <p class="insight" id="insight-${i}"></p>
@@ -139,8 +139,8 @@
       document.getElementById(`bar-nao-${i}`).style.width = pctNao + '%';
       document.getElementById(`pct-sim-${i}`).textContent = pctSim + '%';
       document.getElementById(`pct-nao-${i}`).textContent = pctNao + '%';
-      document.getElementById(`cnt-sim-${i}`).textContent = sim + ' resp.';
-      document.getElementById(`cnt-nao-${i}`).textContent = nao + ' resp.';
+      
+      
 
       let insightText = '';
       if (tot > 0) {
