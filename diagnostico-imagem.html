@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Diagnóstico de Imagem — Michelle Carvalho</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0a0a0a;--gold:#c9a96e;--gold-mid:#ddc898;--gold-pale:#f7f1e8;
+  --gold-dark:#8a6535;--off:#f0ede6;--white:#fff;
+  --g100:#f5f3ef;--g200:#e8e5de;--g400:#b0ab9e;--g600:#6b6560;
+  --serif:'Cormorant Garamond',Georgia,serif;--sans:'Montserrat',sans-serif;
+}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--sans);background:var(--black);color:var(--white);min-height:100vh;overflow-x:hidden}
+.bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 15% 5%,#c9a96e0a 0%,transparent 60%),
+             radial-gradient(ellipse 50% 70% at 85% 95%,#c9a96e06 0%,transparent 60%)}
+.wrap{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:0 18px 80px}
+
+.header{padding:48px 0 36px;text-align:center}
+.header-line{width:32px;height:1px;background:var(--gold);margin:0 auto 18px;opacity:.7}
+.eyebrow{font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.main-title{font-family:var(--serif);font-size:clamp(30px,7vw,44px);font-weight:300;line-height:1.1;margin-bottom:10px}
+.main-title em{font-style:italic;color:var(--gold)}
+.main-sub{font-size:11px;font-weight:300;color:var(--g400);letter-spacing:.06em;margin-bottom:24px}
+.tagline-wrap{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:32px}
+.tagline-wrap::before,.tagline-wrap::after{content:'';flex:1;max-width:48px;height:1px}
+.tagline-wrap::before{background:linear-gradient(to right,transparent,var(--g600))}
+.tagline-wrap::after{background:linear-gradient(to left,transparent,var(--g600))}
+.tagline{font-family:var(--serif);font-size:13px;font-style:italic;color:var(--g600)}
+
+.gender-row{display:flex;gap:12px;justify-content:center;margin-bottom:36px}
+.gender-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 28px;border:1px solid #1e1e1e;background:transparent;color:var(--g600);font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border-radius:10px;transition:all .2s;min-width:110px}
+.gender-btn svg{width:28px;height:28px;stroke:#333;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:all .2s}
+.gender-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,0.05)}
+.gender-btn.active svg{stroke:var(--gold)}
+
+.info-row{display:flex;gap:2rem;justify-content:center;margin-bottom:40px}
+.info-item{text-align:center}
+.info-num{font-family:var(--serif);font-size:28px;color:var(--gold);line-height:1}
+.info-txt{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--g600);margin-top:4px}
+
+.start-btn{display:block;width:100%;max-width:280px;margin:0 auto;padding:14px;background:transparent;border:1.5px solid var(--gold);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:all .2s}
+.start-btn:disabled{opacity:.2;cursor:not-allowed}
+.start-btn:hover:not(:disabled){background:rgba(201,169,110,0.06)}
+
+/* QUIZ */
+.quiz-section{display:none;padding-top:8px}
+.quiz-section.visible{display:block}
+
+.progress-wrap{margin-bottom:28px}
+.progress-label{display:flex;justify-content:space-between;margin-bottom:8px}
+.progress-label span{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--g600)}
+.progress-bar{width:100%;height:2px;background:#1a1a1a;border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s ease}
+
+.q-card{background:#0d0d0d;border:1px solid #1c1c1c;border-radius:16px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
+.q-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:.4}
+
+.q-meta{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
+.q-num{font-family:var(--serif);font-size:36px;font-weight:300;color:var(--gold);opacity:.25;line-height:1;flex-shrink:0}
+.q-dim{font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--g600)}
+.q-text{font-family:var(--serif);font-size:clamp(17px,4vw,21px);font-weight:400;color:var(--white);line-height:1.5;margin-bottom:20px}
+
+.options{display:flex;flex-direction:column;gap:9px}
+.opt{padding:13px 16px;border:1px solid #1a1a1a;background:#111;color:var(--g400);font-family:var(--sans);font-size:12px;font-weight:300;line-height:1.5;cursor:pointer;border-radius:8px;transition:all .18s;text-align:left;display:flex;align-items:flex-start;gap:12px}
+.opt:active{transform:scale(.99)}
+.opt.selected{border-color:var(--gold-mid);background:rgba(201,169,110,0.06);color:var(--white)}
+.opt-marker{width:20px;height:20px;border-radius:50%;border:1.5px solid #2a2a2a;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#2a2a2a;font-family:var(--serif);transition:all .18s}
+.opt.selected .opt-marker{background:var(--gold);border-color:var(--gold);color:var(--black);font-weight:700}
+
+.nav-row{display:flex;gap:10px;margin-top:20px}
+.nav-btn{padding:13px 24px;border:1px solid #1e1e1e;background:transparent;color:var(--g600);font-family:var(--sans);font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:all .2s}
+.nav-btn:disabled{opacity:.2;cursor:not-allowed}
+.nav-btn.primary{border-color:var(--gold);color:var(--gold);flex:1}
+.nav-btn.primary:hover:not(:disabled){background:rgba(201,169,110,0.06)}
+
+/* AUDITORIA */
+.auditoria-section{display:none;padding-top:8px}
+.auditoria-section.visible{display:block}
+
+.aud-header{text-align:center;margin-bottom:28px}
+.aud-eyebrow{font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.aud-titulo{font-family:var(--serif);font-size:clamp(24px,5vw,34px);font-weight:300;line-height:1.1;margin-bottom:8px}
+.aud-titulo em{font-style:italic;color:var(--gold)}
+.aud-desc{font-size:11px;font-weight:300;color:var(--g600);line-height:1.6;max-width:400px;margin:0 auto}
+
+.aud-card{background:#0d0d0d;border:1px solid #1c1c1c;border-radius:16px;padding:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.aud-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:.35}
+.aud-sublabel{font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--g600);margin-bottom:14px;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:11px;font-weight:400;padding:7px 15px;border-radius:20px;border:1px solid #222;background:transparent;color:var(--g600);cursor:pointer;transition:all .15s;letter-spacing:.02em}
+.chip:active{transform:scale(.96)}
+.chip.on{background:var(--gold-pale);border-color:var(--gold-mid);color:var(--gold-dark);font-weight:500}
+
+.aud-nav{display:flex;gap:10px;margin-top:24px}
+
+/* RESULTADO */
+.result-section{display:none;padding-top:8px}
+.result-section.visible{display:block}
+
+.result-hero{background:#0d0d0d;border:1px solid #1c1c1c;border-radius:16px;padding:32px 24px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden}
+.result-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(to right,transparent,var(--gold),transparent)}
+.r-eyebrow{font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.r-nivel{font-family:var(--serif);font-size:clamp(34px,8vw,56px);font-weight:300;color:var(--white);line-height:1;margin-bottom:8px}
+.r-nivel em{font-style:italic;color:var(--gold)}
+.r-sub{font-size:10px;font-weight:300;color:var(--g400);letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px}
+.r-divider{width:40px;height:1px;background:var(--gold);opacity:.4;margin:0 auto 24px}
+.r-direcao{font-family:var(--serif);font-size:clamp(15px,3.5vw,18px);font-weight:300;color:var(--off);line-height:1.85;text-align:left}
+.r-direcao strong{color:var(--gold);font-weight:400}
+
+.secao-res{background:#0d0d0d;border:1px solid #1c1c1c;border-radius:16px;padding:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.secao-res::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:.35}
+.secao-res-titulo{font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.secao-res-lista{list-style:none;display:flex;flex-direction:column;gap:10px}
+.secao-res-lista li{font-size:13px;font-weight:300;color:var(--g400);line-height:1.6;padding-left:16px;position:relative}
+.secao-res-lista li::before{content:'·';color:var(--gold);position:absolute;left:0;top:0}
+
+.aud-res-card{background:#0d0d0d;border:1px solid #1c1c1c;border-radius:16px;padding:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.aud-res-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:.35}
+.aud-res-titulo{font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.aud-res-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.aud-res-item{background:#111;border:1px solid #1e1e1e;border-radius:8px;padding:12px}
+.aud-res-dim{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--g600);margin-bottom:6px}
+.aud-res-val{font-size:11px;color:var(--g400);line-height:1.5}
+
+.dims-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.dim-card{background:#0d0d0d;border:1px solid #1c1c1c;border-radius:12px;padding:16px}
+.dim-name{font-size:9px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--g600);margin-bottom:10px}
+.dim-bar-track{width:100%;height:3px;background:#1a1a1a;border-radius:3px;overflow:hidden;margin-bottom:6px}
+.dim-bar-fill{height:100%;background:var(--gold);border-radius:3px;transition:width 1s ease;width:0%}
+.dim-score-txt{font-size:11px;color:var(--g600)}
+
+.cta-card{background:#0d0d0d;border:1px solid var(--gold);border-radius:16px;padding:28px 24px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden}
+.cta-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(to right,transparent,var(--gold),transparent)}
+.cta-card p{font-family:var(--serif);font-size:16px;font-weight:300;color:var(--g400);line-height:1.7;margin-bottom:20px}
+.cta-link{display:inline-block;padding:13px 36px;border:1.5px solid var(--gold);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;border-radius:8px;transition:all .2s}
+.cta-link:hover{background:rgba(201,169,110,0.08)}
+
+.reset-btn{background:transparent;border:none;color:#2a2a2a;font-family:var(--sans);font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;display:block;margin:0 auto 8px;padding:8px;transition:color .2s}
+.reset-btn:hover{color:var(--gold)}
+
+.footer{text-align:center;margin-top:24px;padding-bottom:8px}
+.footer p{font-family:var(--serif);font-size:14px;color:var(--gold);margin-bottom:4px}
+.footer small{font-size:10px;color:var(--g600);letter-spacing:.07em}
+
+@media(max-width:400px){
+  .dims-grid,.aud-res-grid{grid-template-columns:1fr}
+  .gender-btn{padding:14px 20px;min-width:90px}
+}
+</style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="wrap">
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="header">
+    <div class="header-line"></div>
+    <div class="eyebrow">Método PRESENCE®</div>
+    <h1 class="main-title">Diagnóstico de<br><em>Imagem</em></h1>
+    <p class="main-sub">Descubra o que sua imagem está comunicando</p>
+    <div class="tagline-wrap">
+      <span class="tagline">Presença não é aparência. É alinhamento.</span>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="iniciar()">Iniciar diagnóstico</button>
+
+
+
+  <div class="footer" style="margin-top:40px">
+    <p>Michelle Carvalho</p>
+    <small>Presença não se mostra. Se sustenta. &nbsp;|&nbsp; michellecarva.com.br</small>
+  </div>
+</div>
+
+<!-- QUIZ PARTE 1: perguntas 1 a 6 -->
+<div class="quiz-section" id="quiz1">
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="prog-dim1">Dimensão</span>
+      <span id="prog-count1">1 de 12</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill1" style="width:0%"></div></div>
+  </div>
+  <div class="q-card">
+    <div class="q-meta">
+      <div class="q-num" id="q-num1">01</div>
+      <div class="q-dim" id="q-dim1"></div>
+    </div>
+    <p class="q-text" id="q-text1"></p>
+    <div class="options" id="options1"></div>
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev1" onclick="anterior1()" disabled>Anterior</button>
+      <button class="nav-btn primary" id="btn-next1" onclick="proximo1()" disabled>Próxima</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUDITORIA DO ARMÁRIO -->
+<div class="auditoria-section" id="auditoria">
+  <div class="aud-header">
+    <div class="aud-eyebrow">Seção especial</div>
+    <h2 class="aud-titulo">Auditoria do<br><em>Armário</em></h2>
+    <p class="aud-desc">Olhe para o seu guarda-roupa agora. Observe as peças que mais usa e responda com base no que realmente tem, não no que gostaria de ter.</p>
+  </div>
+
+  <div class="aud-card">
+    <span class="aud-sublabel">As peças que mais uso têm linhas</span>
+    <div class="chips" id="chips-formas"></div>
+  </div>
+
+  <div class="aud-card">
+    <span class="aud-sublabel">As cores predominantes no meu armário são</span>
+    <div class="chips" id="chips-cores"></div>
+  </div>
+
+  <div class="aud-card">
+    <span class="aud-sublabel">As peças ficam no corpo de forma</span>
+    <div class="chips" id="chips-volume"></div>
+  </div>
+
+  <div class="aud-nav">
+    <button class="nav-btn" onclick="voltarQuiz1()">Anterior</button>
+    <button class="nav-btn primary" onclick="irParaQuiz2()">Continuar</button>
+  </div>
+</div>
+
+<!-- QUIZ PARTE 2: perguntas 7 a 12 -->
+<div class="quiz-section" id="quiz2">
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="prog-dim2">Dimensão</span>
+      <span id="prog-count2">7 de 12</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill2" style="width:50%"></div></div>
+  </div>
+  <div class="q-card">
+    <div class="q-meta">
+      <div class="q-num" id="q-num2">07</div>
+      <div class="q-dim" id="q-dim2"></div>
+    </div>
+    <p class="q-text" id="q-text2"></p>
+    <div class="options" id="options2"></div>
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev2" onclick="anterior2()" disabled>Anterior</button>
+      <button class="nav-btn primary" id="btn-next2" onclick="proximo2()" disabled>Próxima</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div class="result-section" id="result">
+  <div class="result-hero">
+    <p class="r-eyebrow">Sua imagem atual</p>
+    <div class="r-nivel" id="r-nivel"></div>
+    <div class="r-sub" id="r-sub"></div>
+    <div class="r-divider"></div>
+    <p class="r-direcao" id="r-direcao"></p>
+  </div>
+
+  <div class="dims-grid" id="dims-grid"></div>
+
+  <div class="secao-res">
+    <p class="secao-res-titulo">Pontos de atenção</p>
+    <ul class="secao-res-lista" id="atencao-lista"></ul>
+  </div>
+
+  <div class="secao-res">
+    <p class="secao-res-titulo">Próximos movimentos</p>
+    <ul class="secao-res-lista" id="proximos-lista"></ul>
+  </div>
+
+  <div class="cta-card">
+    <p id="cta-txt"></p>
+    <a href="https://wa.me/5511982231381" target="_blank" class="cta-link">Quero meu próximo nível na imagem</a>
+  </div>
+
+  <button class="reset-btn" onclick="reiniciar()">Refazer diagnóstico</button>
+
+  <div class="footer">
+    <p>Michelle Carvalho</p>
+    <small>Presença não se mostra. Se sustenta. &nbsp;|&nbsp; michellecarva.com.br</small>
+  </div>
+</div>
+
+</div>
+
+<script>
+const DIMS = ["Apresentação Visual","Comunicação Não Verbal","Posicionamento e Identidade","Consistência e Resultado"];
+
+const QS = [
+    {dim:0,texto:"Como você se sente com sua aparência em reuniões e situações profissionais?",opts:[
+      {t:"Inseguro(a). Sinto que minha imagem não está adequada ao ambiente.",p:1},
+      {t:"Incerto(a). Às vezes me sinto bem, mas não sei o que realmente funciona para mim.",p:2},
+      {t:"Razoavelmente confiante. Me preparo, mas ainda sinto que falta algo.",p:3},
+      {t:"Confiante. Sei que minha imagem está alinhada com o que quero transmitir.",p:4}
+    ]},
+    {dim:0,texto:"Seu guarda-roupa profissional reflete quem você é hoje?",opts:[
+      {t:"Não. Uso o que tenho sem pensar muito nisso.",p:1},
+      {t:"Parcialmente. Tenho peças adequadas, mas sem critério claro.",p:2},
+      {t:"Em parte. Já comecei a organizar, mas ainda há inconsistências.",p:3},
+      {t:"Sim. Meu guarda-roupa é intencional e coerente com meu posicionamento.",p:4}
+    ]},
+    {dim:0,texto:"Quando você chega a um ambiente profissional novo, as pessoas percebem sua presença?",opts:[
+      {t:"Raramente. Costumo passar despercebida.",p:1},
+      {t:"Às vezes. Depende muito do ambiente.",p:2},
+      {t:"Com frequência. Percebo que as pessoas me notam.",p:3},
+      {t:"Quase sempre. Minha entrada gera atenção e reconhecimento.",p:4}
+    ]},
+    {dim:1,texto:"Como é sua postura e linguagem corporal em situações profissionais?",opts:[
+      {t:"Encolhida. Tendo a diminuir meu espaço.",p:1},
+      {t:"Instável. Varia muito conforme meu estado emocional.",p:2},
+      {t:"Presente na maioria das vezes. Perco isso sob pressão.",p:3},
+      {t:"Consistente. Mantenho postura aberta e confiante mesmo sob pressão.",p:4}
+    ]},
+    {dim:1,texto:"Como as pessoas reagem quando você fala em público ou apresenta ideias?",opts:[
+      {t:"Evito falar em público. Sinto que minha voz não tem peso.",p:1},
+      {t:"Falo, mas nem sempre sou levada a sério.",p:2},
+      {t:"Tenho boa receptividade, mas ainda trabalho para melhorar.",p:3},
+      {t:"Minha fala gera atenção e credibilidade.",p:4}
+    ]},
+    {dim:1,texto:"Você consegue manter contato visual e presença equilibrada em conversas importantes?",opts:[
+      {t:"Tenho dificuldade. Desvio o olhar ou fico tensa.",p:1},
+      {t:"Consigo às vezes, mas me disperso com facilidade.",p:2},
+      {t:"Na maioria das vezes sim, com pequenas variações.",p:3},
+      {t:"Sim. Mantenho presença física e emocional de forma natural.",p:4}
+    ]},
+    {dim:2,texto:"Você sabe como quer ser percebida no seu ambiente profissional?",opts:[
+      {t:"Não. Ainda não pensei nisso de forma consciente.",p:1},
+      {t:"Tenho uma ideia vaga, mas não sei como construir isso.",p:2},
+      {t:"Tenho clareza, mas minha imagem ainda não traduz isso totalmente.",p:3},
+      {t:"Sim. Sei exatamente o que quero comunicar e trabalho para isso.",p:4}
+    ]},
+    {dim:2,texto:"Seu comportamento, sua comunicação e sua aparência contam a mesma história?",opts:[
+      {t:"Não. Percebo inconsistências entre o que sou e o que projeto.",p:1},
+      {t:"Parcialmente. Alguns aspectos estão alinhados, outros não.",p:2},
+      {t:"Em grande parte sim, com alguns pontos a ajustar.",p:3},
+      {t:"Sim. Há coerência entre o que penso, como me apresento e como me comunico.",p:4}
+    ]},
+    {dim:2,texto:"Seu valor profissional é percebido pelas pessoas certas?",opts:[
+      {t:"Não. Me sinto invisível ou subestimada com frequência.",p:1},
+      {t:"Às vezes. Depende do grupo ou contexto.",p:2},
+      {t:"Geralmente sim, mas ainda há espaço para ampliar.",p:3},
+      {t:"Sim. As pessoas certas reconhecem e valorizam o que entrego.",p:4}
+    ]},
+    {dim:3,texto:"Sua imagem é consistente em todos os ambientes onde você atua?",opts:[
+      {t:"Não. Sou percebido(a) de formas diferentes dependendo do ambiente.",p:1},
+      {t:"Parcialmente. Há coerência em alguns contextos, mas não em todos.",p:2},
+      {t:"Em grande parte sim, com pequenas variações.",p:3},
+      {t:"Sim. Minha imagem é reconhecível e consistente em qualquer ambiente.",p:4}
+    ]},
+    {dim:3,texto:"Sua imagem já gerou oportunidades concretas, como clientes, convites ou promoções?",opts:[
+      {t:"Não. Nunca percebi oportunidades chegando por conta da minha imagem.",p:1},
+      {t:"Raramente. Uma ou outra vez, mas não é recorrente.",p:2},
+      {t:"Com alguma frequência. Percebo resultados, mas quero ampliar.",p:3},
+      {t:"Sim. Minha imagem gera resultados de forma consistente.",p:4}
+    ]},
+    {dim:3,texto:"Você trata sua imagem como um investimento estratégico?",opts:[
+      {t:"Não. Nunca pensei em imagem como investimento.",p:1},
+      {t:"Raramente. Faço ajustes pontuais quando sinto necessidade.",p:2},
+      {t:"Às vezes. Já busquei orientações, mas ainda sem constância.",p:3},
+      {t:"Sim. Cuido da minha imagem como parte do meu desenvolvimento profissional.",p:4}
+    ]}
+];
+
+const AUD_OPCOES = {
+  formas:{label:"Linhas",itens:["Retas e estruturadas","Curvas e orgânicas","Inclinadas ou assimétricas","Varia bastante"]},
+  cores:{label:"Cores",itens:["Escuras (preto, marinho, bordô)","Neutras (cinza, bege, camel)","Claras (branco, off-white, creme)","Intensas ou vibrantes","Suaves ou pastéis","Estampadas"]},
+  volume:{label:"Volume",itens:["Rentes ao corpo","Estruturadas com ombro marcado","Com volume ou oversized","Fluem sem marcar","Misto, depende da peça"]}
+};
+
+const audRespostas = {formas:new Set(),cores:new Set(),volume:new Set()};
+
+const PERFIS = [
+    {
+      min:0,max:24,
+      nivel:"Presença",nivel2:"Invisível",
+      sub:"Imagem ainda não alinhada ao seu valor",
+      direcao:"Sua imagem atual ainda não está comunicando quem você é. O ambiente pode reconhecer um profissional capaz, mas a mensagem que sua presença transmite <strong>não sustenta o nível de valor que você possui</strong>. Existe uma distância real entre o que você entrega e o que o ambiente percebe. Essa distância tem consequências diretas em oportunidades, reconhecimento e retorno financeiro. O primeiro movimento é entender o que sua imagem está dizendo antes mesmo de você abrir a boca.",
+      atencao:["Sua apresentação visual pode estar gerando leituras que não correspondem ao seu nível de competência","Sua linguagem corporal pode estar comunicando insegurança antes mesmo de você se apresentar","Sem um posicionamento claro, o ambiente define sua imagem por você"],
+      proximos:["Observe o que suas peças comunicam e decida o que precisa mudar","Trabalhe postura e linguagem corporal: são os primeiros sinais que o ambiente lê","Defina como quer ser percebido(a) e use isso como critério para cada escolha de imagem"],
+      cta:"Seu próximo nível na imagem começa com uma decisão consciente. Entender o que sua presença comunica hoje é o primeiro passo."
+    },
+    {
+      min:25,max:36,
+      nivel:"Presença",nivel2:"em Construção",
+      sub:"Consciência existe. Consistência ainda não.",
+      direcao:"Você já entende que imagem importa e está construindo sua presença. Mas ainda há <strong>inconsistências que limitam seu impacto</strong>. Em alguns contextos sua imagem funciona bem; em outros, ela ainda não sustenta a credibilidade que você quer transmitir. Essa oscilação custa oportunidades que você às vezes nem identifica como perdidas. O próximo movimento é consolidar o que já funciona e eliminar os pontos de ruído que enfraquecem sua mensagem.",
+      atencao:["A inconsistência entre ambientes gera confusão sobre quem você realmente é","Há momentos em que sua imagem não sustenta o discurso que você quer entregar","Sua comunicação não verbal pode ainda estar contradizendo sua fala em situações de pressão"],
+      proximos:["Alinhe digital, presencial e comunicação para que contem a mesma história","Defina dois ou três atributos centrais e revise sua imagem com base neles","Trabalhe a consistência: o que funciona em um ambiente precisa funcionar em todos"],
+      cta:"Seu próximo nível na imagem é consistência. Com os ajustes certos, sua presença passa a gerar resultados de forma previsível."
+    },
+    {
+      min:37,max:48,
+      nivel:"Presença",nivel2:"Estratégica",
+      sub:"Imagem como ativo de posicionamento",
+      direcao:"Sua imagem é um ativo. Você entende que presença se constrói com intenção, trabalha isso de forma consciente e já colhe resultados. Há consistência, clareza de posicionamento e consciência do impacto que você gera. <strong>O próximo nível é refinamento e expansão</strong>: garantir que cada detalhe continue evoluindo junto com seus objetivos, e que sua presença abra portas antes mesmo de você precisar justificar seu valor.",
+      atencao:["Manter consistência em todos os pontos de contato exige revisão contínua","À medida que seu posicionamento cresce, sua imagem precisa acompanhar essa evolução","Pequenos detalhes de refinamento podem ampliar significativamente seu impacto em ambientes de alto nível"],
+      proximos:["Revise sua presença digital: ela está no mesmo nível da sua presença presencial?","Refine os detalhes que elevam a percepção de nível","Expanda sua visibilidade nos ambientes onde as pessoas certas estão"],
+      cta:"Seu próximo nível na imagem é expansão. Você tem a base. Agora é ampliar o alcance e o impacto da sua presença."
+    }
+];
+
+let atual1=0, atual2=6, respostas=[], qs=QS;
+
+// CHIPS AUDITORIA
+function buildAuditoria(){
+  Object.keys(AUD_OPCOES).forEach(key=>{
+    const cfg=AUD_OPCOES[key];
+    const el=document.getElementById('chips-'+key);
+    cfg.itens.forEach(item=>{
+      const b=document.createElement('button');
+      b.className='chip'; b.textContent=item;
+      b.onclick=()=>{
+        b.classList.toggle('on');
+        if(audRespostas[key].has(item)) audRespostas[key].delete(item);
+        else audRespostas[key].add(item);
+      };
+      el.appendChild(b);
+    });
+  });
+}
+
+function iniciar(){
+  respostas=new Array(qs.length).fill(null);
+  atual1=0; atual2=6;
+  document.getElementById('intro').style.display='none';
+  document.getElementById('quiz1').classList.add('visible');
+  render1();
+}
+
+function render1(){
+  const q=qs[atual1],total=qs.length;
+  document.getElementById('progress-fill1').style.width=((atual1/total)*100)+'%';
+  document.getElementById('prog-dim1').textContent=DIMS[q.dim];
+  document.getElementById('prog-count1').textContent=(atual1+1)+' de '+total;
+  document.getElementById('q-num1').textContent=String(atual1+1).padStart(2,'0');
+  document.getElementById('q-dim1').textContent=DIMS[q.dim];
+  document.getElementById('q-text1').textContent=q.texto;
+  const c=document.getElementById('options1');
+  c.innerHTML='';
+  q.opts.forEach((op,i)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(respostas[atual1]===i?' selected':'');
+    b.innerHTML=`<span class="opt-marker">${String.fromCharCode(65+i)}</span>${op.t}`;
+    b.onclick=()=>sel1(i);
+    c.appendChild(b);
+  });
+  document.getElementById('btn-prev1').disabled=atual1===0;
+  document.getElementById('btn-next1').disabled=respostas[atual1]===null;
+  document.getElementById('btn-next1').textContent=atual1===5?'Continuar':'Próxima';
+}
+
+function sel1(i){
+  respostas[atual1]=i;
+  document.querySelectorAll('#options1 .opt').forEach((b,idx)=>b.classList.toggle('selected',idx===i));
+  document.getElementById('btn-next1').disabled=false;
+}
+
+function proximo1(){
+  if(atual1===5){
+    document.getElementById('quiz1').classList.remove('visible');
+    document.getElementById('auditoria').classList.add('visible');
+    window.scrollTo(0,0);
+  } else { atual1++; render1(); }
+}
+
+function anterior1(){
+  if(atual1>0){ atual1--; render1(); }
+}
+
+function voltarQuiz1(){
+  document.getElementById('auditoria').classList.remove('visible');
+  document.getElementById('quiz1').classList.add('visible');
+  window.scrollTo(0,0);
+}
+
+function irParaQuiz2(){
+  document.getElementById('auditoria').classList.remove('visible');
+  document.getElementById('quiz2').classList.add('visible');
+  render2();
+  window.scrollTo(0,0);
+}
+
+function render2(){
+  const q=qs[atual2],total=qs.length;
+  document.getElementById('progress-fill2').style.width=((atual2/total)*100)+'%';
+  document.getElementById('prog-dim2').textContent=DIMS[q.dim];
+  document.getElementById('prog-count2').textContent=(atual2+1)+' de '+total;
+  document.getElementById('q-num2').textContent=String(atual2+1).padStart(2,'0');
+  document.getElementById('q-dim2').textContent=DIMS[q.dim];
+  document.getElementById('q-text2').textContent=q.texto;
+  const c=document.getElementById('options2');
+  c.innerHTML='';
+  q.opts.forEach((op,i)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(respostas[atual2]===i?' selected':'');
+    b.innerHTML=`<span class="opt-marker">${String.fromCharCode(65+i)}</span>${op.t}`;
+    b.onclick=()=>sel2(i);
+    c.appendChild(b);
+  });
+  document.getElementById('btn-prev2').disabled=atual2===6;
+  document.getElementById('btn-next2').disabled=respostas[atual2]===null;
+  document.getElementById('btn-next2').textContent=atual2===11?'Ver resultado':'Próxima';
+}
+
+function sel2(i){
+  respostas[atual2]=i;
+  document.querySelectorAll('#options2 .opt').forEach((b,idx)=>b.classList.toggle('selected',idx===i));
+  document.getElementById('btn-next2').disabled=false;
+}
+
+function proximo2(){
+  if(atual2===11) calcular();
+  else{ atual2++; render2(); }
+}
+
+function anterior2(){
+  if(atual2===6){
+    document.getElementById('quiz2').classList.remove('visible');
+    document.getElementById('auditoria').classList.add('visible');
+    window.scrollTo(0,0);
+  } else { atual2--; render2(); }
+}
+
+function calcular(){
+  const total=respostas.reduce((a,r,i)=>a+(r!==null?qs[i].opts[r].p:0),0);
+  const dimPts=[0,0,0,0],dimCnt=[0,0,0,0];
+  qs.forEach((q,i)=>{ if(respostas[i]!==null){ dimPts[q.dim]+=qs[i].opts[respostas[i]].p; dimCnt[q.dim]++; }});
+
+  const perfil=PERFIS.find(p=>total>=p.min&&total<=p.max)||PERFIS[2];
+
+  document.getElementById('r-nivel').innerHTML=perfil.nivel+'<br><em>'+perfil.nivel2+'</em>';
+  document.getElementById('r-sub').textContent=perfil.sub;
+  document.getElementById('r-direcao').innerHTML=perfil.direcao;
+
+  const dg=document.getElementById('dims-grid');
+  dg.innerHTML='';
+  DIMS.forEach((d,i)=>{
+    const max=dimCnt[i]*4;
+    const pct=max>0?Math.round((dimPts[i]/max)*100):0;
+    const label=pct>=75?'Desenvolvida':pct>=50?'Em consolidação':pct>=25?'Em desenvolvimento':'Precisa de atenção';
+    const card=document.createElement('div');
+    card.className='dim-card';
+    card.innerHTML=`<p class="dim-name">${d}</p><div class="dim-bar-track"><div class="dim-bar-fill" id="df-${i}"></div></div><p class="dim-score-txt">${label}</p>`;
+    dg.appendChild(card);
+    setTimeout(()=>{ document.getElementById('df-'+i).style.width=pct+'%'; },300+i*100);
+  });
+
+
+  document.getElementById('atencao-lista').innerHTML=perfil.atencao.map(a=>`<li>${a}</li>`).join('');
+  document.getElementById('proximos-lista').innerHTML=perfil.proximos.map(p=>`<li>${p}</li>`).join('');
+  document.getElementById('cta-txt').textContent=perfil.cta;
+
+  document.getElementById('quiz2').classList.remove('visible');
+  document.getElementById('result').classList.add('visible');
+  window.scrollTo(0,0);
+}
+
+function reiniciar(){
+  atual1=0; atual2=6; respostas=[];
+  Object.keys(audRespostas).forEach(k=>audRespostas[k].clear());
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('result').classList.remove('visible');
+  document.getElementById('intro').style.display='block';
+  window.scrollTo(0,0);
+}
+
+buildAuditoria();
+</script>
+</body>
+</html>
